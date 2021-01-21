@@ -23,24 +23,15 @@ disable=
     consider-using-sys-exit,
     invalid-name,
     missing-docstring,
-    mixed-indentation,
     no-else-return,
     no-self-use,
     pointless-string-statement,
     redefined-builtin,
     redefined-outer-name,
     singleton-comparison,
-    superfluous-parens,
     too-few-public-methods,
-    trailing-newlines,
-    undefined-variable,
-    ungrouped-imports,
-    unnecessary-semicolon,
-    unused-import,
-    unused-variable,
-    unused-wildcard-import,
-    useless-object-inheritance,
-    wildcard-import
+    too-many-public-methods,
+    ungrouped-imports
 
 [BASIC]
 
