@@ -1,3 +1,5 @@
+# pylint: disable=wildcard-import,undefined-variable,unused-wildcard-import
+
 from rule import Rule
 from opcodes import *
 from util import *
