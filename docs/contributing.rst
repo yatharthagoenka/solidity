@@ -99,10 +99,8 @@ This can be easiest accomplished using Homebrew: ``brew install coreutils``.
 Search paths
 ------------
 
-The dependent libraries (such as ``evmone.so`` / ``evmone.dll``) can be
-located in different locations to be found automatically.
-
-The paths that are looked up in order are:
+The dependent libraries (such as ``evmone.so`` / ``evmone.dll``) will be loaded
+automatically if they are placed in one of the following locations:
 
 - ``$ETH_EVMONE``
 - ``$PROJECT_ROOT/deps``
