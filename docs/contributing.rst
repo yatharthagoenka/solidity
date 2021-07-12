@@ -113,7 +113,7 @@ The paths that are looked up in order are:
 - ``$PROJECT_ROOT/../../deps/lib``
 - ``$PROJECT_ROOT/../../../deps/lib``
 
-Whereas ``$ETH_EVMONE`` is a user-supplied environment variable and
+Where ``$ETH_EVMONE`` is a user-supplied environment variable and
 ``$PROJECT_ROOT`` the path to the Solidity source code's root directory.
 
 Running the Tests
