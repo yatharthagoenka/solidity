@@ -107,7 +107,7 @@ automatically if they are placed in one of the following locations:
 - ``$PROJECT_ROOT/deps/lib``
 - ``$PROJECT_ROOT/../deps``
 - ``$PROJECT_ROOT/../deps/lib``
-- ``$PROJECT_ROOT/../../deps/lib``
+- ``$PROJECT_ROOT/../../deps``
 - ``$PROJECT_ROOT/../../deps/lib``
 - ``$PROJECT_ROOT/../../../deps/lib``
 
