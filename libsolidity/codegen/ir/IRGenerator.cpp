@@ -324,6 +324,7 @@ string IRGenerator::generateFunction(FunctionDefinition const& _function)
 	return m_context.functionCollector().createFunction(functionName, [&]() {
 		m_context.resetLocalVariables();
 		Whiskers t(R"(
+			/// @ast-id <astID>
 			function <functionName>(<params>)<?+retParams> -> <retParams></+retParams> {
 				<sourceLocationComment>
 				<retInit>
@@ -334,6 +335,7 @@ string IRGenerator::generateFunction(FunctionDefinition const& _function)
 		t("sourceLocationComment", sourceLocationComment(_function, m_context));
 
 		t("functionName", functionName);
+		t("astID", to_string(_function.id()));
 		vector<string> params;
 		for (auto const& varDecl: _function.parameters())
 			params += m_context.addLocalVariable(*varDecl).stackSlots();
