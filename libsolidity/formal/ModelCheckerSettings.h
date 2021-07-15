@@ -113,6 +113,7 @@ struct ModelCheckerSettings
 {
 	ModelCheckerContracts contracts = ModelCheckerContracts::Default();
 	ModelCheckerEngine engine = ModelCheckerEngine::None();
+	bool invariants = false;
 	ModelCheckerTargets targets = ModelCheckerTargets::Default();
 	std::optional<unsigned> timeout;
 
