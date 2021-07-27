@@ -1,6 +1,12 @@
 import base64
 import docutils  # pragma pylint: disable=import-error
 
+from sphinx.util import logging  # pragma pylint: disable=import-error
+
+MAX_SAFE_URL_LENGTH = 2000
+
+logger = logging.getLogger(__name__)
+
 
 def insert_node_before(child, new_sibling):
     assert child in child.parent.children
@@ -18,8 +24,8 @@ def remix_code_url(source_code):
     return f"https://remix.ethereum.org/?code={base64_encoded_source}"
 
 
-def build_remix_link_node(source_code):
-    reference_node = docutils.nodes.reference('', '', internal=False, refuri=remix_code_url(source_code))
+def build_remix_link_node(url):
+    reference_node = docutils.nodes.reference('', '', internal=False, refuri=url)
     reference_node.set_class('remix-link')
     reference_node.append(docutils.nodes.Text("Open in Remix IDE"))
 
@@ -39,7 +45,16 @@ def insert_remix_link(app, doctree):
             text_nodes = list(literal_block_node.traverse(docutils.nodes.Text))
             assert len(text_nodes) == 1
 
-            insert_node_before(literal_block_node, build_remix_link_node(text_nodes[0]))
+            remix_url = remix_code_url(text_nodes[0])
+            if len(remix_url.encode('utf-8')) > MAX_SAFE_URL_LENGTH:
+                logger.warning(
+                    "Remix URL generated from the code snippet exceeds the maximum safe URL length "
+                    " (%d bytes).",
+                    MAX_SAFE_URL_LENGTH,
+                    location=(literal_block_node.source, literal_block_node.line),
+                )
+
+            insert_node_before(literal_block_node, build_remix_link_node(remix_url))
 
 
 def setup(app):
