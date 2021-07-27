@@ -29,7 +29,10 @@ def build_remix_link_node(source_code):
     return paragraph_node
 
 
-def insert_remix_link(doctree):
+def insert_remix_link(app, doctree):
+    if app.builder.format != 'html' or app.builder.name == 'epub':
+        return
+
     for literal_block_node in doctree.traverse(docutils.nodes.literal_block):
         assert 'language' in literal_block_node.attributes
         if literal_block_node.attributes['language'].lower() == 'solidity':
@@ -42,7 +45,7 @@ def insert_remix_link(doctree):
 def setup(app):
     app.connect(
         'doctree-resolved',
-        lambda app, doctree, docname: insert_remix_link(doctree)
+        lambda app, doctree, docname: insert_remix_link(app, doctree)
     )
 
     return {
