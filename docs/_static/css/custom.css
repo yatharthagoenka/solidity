@@ -24,7 +24,7 @@ p.remix-link-container {
 /* Link to Remix IDE shown over code snippets */
 a.remix-link {
     /* Remix icon. */
-    background:url("https://remix.ethereum.org/assets/img/remixLogo.webp");
+    background:url("../img/remixLogo.webp");
     background-size: cover;
     width: 30px;
     height: 30px;
