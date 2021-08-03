@@ -4,6 +4,7 @@ Language Features:
 
 
 Compiler Features:
+ * Commandline Interface: Report optimizer options as invalid in Standard JSON and linker modes instead of ignoring them.
 
 
 Bugfixes:
