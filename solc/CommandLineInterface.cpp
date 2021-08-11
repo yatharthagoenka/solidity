@@ -161,7 +161,10 @@ void CommandLineInterface::handleBinary(string const& _contract)
 		else
 		{
 			sout() << "Binary:" << endl;
-			sout() << objectWithLinkRefsHex(m_compiler->object(_contract)) << endl;
+			if (m_linkerObject)
+				sout() << objectWithLinkRefsHex(*m_linkerObject) << endl;
+			if (m_compiler)
+				sout() << objectWithLinkRefsHex(m_compiler->object(_contract)) << endl;
 		}
 	}
 	if (m_options.compiler.outputs.binaryRuntime)
@@ -178,12 +181,18 @@ void CommandLineInterface::handleBinary(string const& _contract)
 
 void CommandLineInterface::handleOpcode(string const& _contract)
 {
+	bytes bytecode;
+	if (m_compiler)
+		bytecode = m_compiler->object(_contract).bytecode;
+	else if (m_linkerObject)
+		bytecode = m_linkerObject->bytecode;
+
 	if (!m_options.output.dir.empty())
-		createFile(m_compiler->filesystemFriendlyName(_contract) + ".opcode", evmasm::disassemble(m_compiler->object(_contract).bytecode));
+		createFile(m_compiler->filesystemFriendlyName(_contract) + ".opcode", evmasm::disassemble(bytecode));
 	else
 	{
 		sout() << "Opcodes:" << endl;
-		sout() << std::uppercase << evmasm::disassemble(m_compiler->object(_contract).bytecode);
+		sout() << std::uppercase << evmasm::disassemble(bytecode);
 		sout() << endl;
 	}
 }
@@ -564,6 +573,8 @@ bool CommandLineInterface::processInput()
 	case InputMode::Compiler:
 	case InputMode::CompilerWithASTImport:
 		return compile();
+	case InputMode::AssemblyJson:
+		return assembleFromAssemblyJson();
 	}
 
 	solAssert(false, "");
@@ -828,14 +839,15 @@ void CommandLineInterface::handleAst()
 
 bool CommandLineInterface::actOnInput()
 {
-	if (m_options.input.mode == InputMode::StandardJson || m_options.input.mode == InputMode::Assembler)
+	if (m_options.input.mode == InputMode::StandardJson ||
+		m_options.input.mode == InputMode::Assembler)
 		// Already done in "processInput" phase.
 		return true;
 	else if (m_options.input.mode == InputMode::Linker)
 		writeLinkedFiles();
 	else
 	{
-		solAssert(m_options.input.mode == InputMode::Compiler || m_options.input.mode == InputMode::CompilerWithASTImport, "");
+		solAssert(m_options.input.mode == InputMode::Compiler || m_options.input.mode == InputMode::CompilerWithASTImport  || m_options.input.mode == InputMode::AssemblyJson, "");
 		outputCompilationResults();
 	}
 	return !m_error;
@@ -1087,6 +1099,16 @@ bool CommandLineInterface::assemble(
 	return true;
 }
 
+bool CommandLineInterface::assembleFromAssemblyJson()
+{
+	solAssert(m_fileReader.sourceCodes().size() == 1, "");
+
+	Json::Value assemblyJson;
+	m_assembly = make_unique<evmasm::Assembly>();
+	return util::jsonParseStrict(m_fileReader.sourceCodes().begin()->second, assemblyJson) &&
+				m_assembly->loadFromAssemblyJSON(assemblyJson, *m_assembly);
+}
+
 void CommandLineInterface::outputCompilationResults()
 {
 	handleCombinedJSON();
@@ -1094,54 +1116,74 @@ void CommandLineInterface::outputCompilationResults()
 	// do we need AST output?
 	handleAst();
 
-	if (
-		!m_compiler->compilationSuccessful() &&
-		m_options.output.stopAfter == CompilerStack::State::CompilationSuccessful
-	)
+	if (m_assembly)
 	{
-		serr() << endl << "Compilation halted after AST generation due to errors." << endl;
-		return;
+		solAssert(m_compiler == nullptr, "");
+		m_linkerObject = make_unique<evmasm::LinkerObject>(m_assembly->assemble());
+		if (!m_linkerObject->bytecode.empty())
+			m_hasOutput = true;
+
+		handleBytecode("");
+		if (m_options.compiler.outputs.asm_)
+		{
+			sout() << "EVM assembly:" << endl;
+			sout() << m_assembly->assemblyString() << endl;
+		}
 	}
 
-	vector<string> contracts = m_compiler->contractNames();
-	for (string const& contract: contracts)
+	if (m_compiler)
 	{
-		if (needsHumanTargetedStdout(m_options))
-			sout() << endl << "======= " << contract << " =======" << endl;
-
-		// do we need EVM assembly?
-		if (m_options.compiler.outputs.asm_ || m_options.compiler.outputs.asmJson)
+		solAssert(m_assembly == nullptr, "");
+		if (!m_compiler->compilationSuccessful()
+			&& m_options.output.stopAfter == CompilerStack::State::CompilationSuccessful)
 		{
-			string ret;
-			if (m_options.compiler.outputs.asmJson)
-				ret = jsonPrettyPrint(removeNullMembers(m_compiler->assemblyJSON(contract)));
-			else
-				ret = m_compiler->assemblyString(contract, m_fileReader.sourceCodes());
-
-			if (!m_options.output.dir.empty())
-			{
-				createFile(m_compiler->filesystemFriendlyName(contract) + (m_options.compiler.outputs.asmJson ? "_evm.json" : ".evm"), ret);
-			}
-			else
-			{
-				sout() << "EVM assembly:" << endl << ret << endl;
-			}
+			serr() << endl << "Compilation halted after AST generation due to errors." << endl;
+			return;
 		}
 
-		if (m_options.compiler.estimateGas)
-			handleGasEstimation(contract);
+		vector<string> contracts = m_compiler->contractNames();
+		for (string const& contract: contracts)
+		{
+			if (needsHumanTargetedStdout(m_options))
+				sout() << endl << "======= " << contract << " =======" << endl;
 
-		handleBytecode(contract);
-		handleIR(contract);
-		handleIROptimized(contract);
-		handleEwasm(contract);
-		handleSignatureHashes(contract);
-		handleMetadata(contract);
-		handleABI(contract);
-		handleStorageLayout(contract);
-		handleNatspec(true, contract);
-		handleNatspec(false, contract);
-	} // end of contracts iteration
+			// do we need EVM assembly?
+			if (m_options.compiler.outputs.asm_ || m_options.compiler.outputs.asmJson)
+			{
+				string ret;
+				if (m_options.compiler.outputs.asmJson)
+					ret = jsonPrettyPrint(removeNullMembers(m_compiler->assemblyJSON(contract)));
+				else
+					ret = m_compiler->assemblyString(contract, m_fileReader.sourceCodes());
+
+				if (!m_options.output.dir.empty())
+				{
+					createFile(
+						m_compiler->filesystemFriendlyName(contract)
+							+ (m_options.compiler.outputs.asmJson ? "_evm.json" : ".evm"),
+						ret);
+				}
+				else
+				{
+					sout() << "EVM assembly:" << endl << ret << endl;
+				}
+			}
+
+			if (m_options.compiler.estimateGas)
+				handleGasEstimation(contract);
+
+			handleBytecode(contract);
+			handleIR(contract);
+			handleIROptimized(contract);
+			handleEwasm(contract);
+			handleSignatureHashes(contract);
+			handleMetadata(contract);
+			handleABI(contract);
+			handleStorageLayout(contract);
+			handleNatspec(true, contract);
+			handleNatspec(false, contract);
+		} // end of contracts iteration
+	}
 
 	if (!m_hasOutput)
 	{

@@ -155,6 +155,8 @@ public:
 		std::map<std::string, unsigned> const& _sourceIndices = std::map<std::string, unsigned>()
 	) const;
 
+	bool loadFromAssemblyJSON(Json::Value const& _json, Assembly& _assembly);
+
 	/// Mark this assembly as invalid. Calling ``assemble`` on it will throw.
 	void markAsInvalid() { m_invalid = true; }
 
@@ -168,6 +170,10 @@ protected:
 	std::map<u256, u256> optimiseInternal(OptimiserSettings const& _settings, std::set<size_t> _tagsReferencedFromOutside);
 
 	unsigned bytesRequired(unsigned subTagSize) const;
+
+	static AssemblyItem assemblyItemFromJSON(Json::Value const& _json, Assembly& _assembly);
+	static void forEachJSONAssemblyItem(Json::Value const& _code, Assembly& _assembly);
+	std::vector<Json::Value> assemblyItemAsJSON(AssemblyItem const& _item, int _sourceIndex) const;
 
 private:
 	static Json::Value createJsonValue(

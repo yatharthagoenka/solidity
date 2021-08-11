@@ -138,8 +138,7 @@ BOOST_AUTO_TEST_CASE(all_assembly_items)
 		"\n"
 		"auxdata: 0x4266eeaa\n"
 	);
-	BOOST_CHECK_EQUAL(
-		util::jsonCompactPrint(_assembly.assemblyJSON(indices)),
+	string json{
 		"{\".auxdata\":\"4266eeaa\",\".code\":["
 		"{\"begin\":1,\"end\":3,\"name\":\"tag\",\"source\":0,\"value\":\"1\"},"
 		"{\"begin\":1,\"end\":3,\"name\":\"JUMPDEST\",\"source\":0},"
@@ -162,7 +161,13 @@ BOOST_AUTO_TEST_CASE(all_assembly_items)
 		"{\"begin\":6,\"end\":8,\"name\":\"PUSHIMMUTABLE\",\"source\":1,\"value\":\"someImmutable\"},"
 		"{\"begin\":6,\"end\":8,\"name\":\"INVALID\",\"source\":1}"
 		"]},\"A6885B3731702DA62E8E4A8F584AC46A7F6822F4E2BA50FBA902F67B1588D23B\":\"01020304\"}}"
-	);
+	};
+	BOOST_CHECK_EQUAL(util::jsonCompactPrint(_assembly.assemblyJSON(indices)), json);
+
+	Assembly _assemblyFromJson;
+	_assemblyFromJson.loadFromAssemblyJSON(_assembly.assemblyJSON(indices), _assemblyFromJson);
+	BOOST_CHECK_EQUAL(util::jsonCompactPrint(_assemblyFromJson.assemblyJSON(indices)), json);
+	BOOST_CHECK_EQUAL(_assembly.assemble().toHex(), _assemblyFromJson.assemble().toHex());
 }
 
 BOOST_AUTO_TEST_CASE(immutable)
