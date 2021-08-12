@@ -47,7 +47,17 @@ struct StackLayout
 class StackLayoutGenerator
 {
 public:
+	struct StackTooDeep
+	{
+		/// Number of slots that need to be saved.
+		size_t deficit = 0;
+		/// Set of variables, eliminating which would decrease the stack deficit.
+		std::set<YulString> variableChoices;
+	};
+
 	static StackLayout run(CFG const& _cfg);
+	static std::map<YulString, std::vector<StackTooDeep>> reportStackTooDeep(CFG const& _cfg);
+	static std::vector<StackTooDeep> reportStackTooDeep(CFG const& _cfg, YulString _functionName);
 
 private:
 	StackLayoutGenerator(StackLayout& _context);
@@ -85,6 +95,10 @@ private:
 	/// Calculates the ideal stack layout, s.t. both @a _stack1 and @a _stack2 can be achieved with minimal
 	/// stack shuffling when starting from the returned layout.
 	static Stack combineStack(Stack const& _stack1, Stack const& _stack2);
+
+	/// Walks through the CFG and reports and stack too deep errors that would occur when generating code for it
+	/// without countermeasures.
+	std::vector<StackTooDeep> reportStackTooDeep(CFG::BasicBlock const& _entry);
 
 	/// @returns a copy of @a _stack stripped of all duplicates and slots that can be freely generated.
 	/// Attempts to create a layout that requires a minimal amount of operations to reconstruct the original
