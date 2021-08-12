@@ -59,7 +59,7 @@ SMTEncoder::SMTEncoder(
 
 bool SMTEncoder::analyze(SourceUnit const& _source)
 {
-	state().prepareForSourceUnit(_source);
+	state().prepareForSourceUnit(_source, m_settings.externalCalls.isTrusted());
 
 	return true;
 }
@@ -2660,6 +2660,16 @@ MemberAccess const* SMTEncoder::isEmptyPush(Expression const& _expr) const
 	return nullptr;
 }
 
+smtutil::Expression SMTEncoder::contractAddressValue(FunctionCall const& _f)
+{
+	FunctionType const& funType = dynamic_cast<FunctionType const&>(*_f.expression().annotation().type);
+	if (funType.kind() == FunctionType::Kind::Internal)
+		return state().thisAddress();
+	if (MemberAccess const* callBase = dynamic_cast<MemberAccess const*>(&_f.expression()))
+		return expr(callBase->expression());
+	solAssert(false, "Unreachable!");
+}
+
 bool SMTEncoder::isPublicGetter(Expression const& _expr) {
 	if (!isTrustedExternalCall(&_expr))
 		return false;
@@ -2930,7 +2940,7 @@ RationalNumberType const* SMTEncoder::isConstant(Expression const& _expr)
 	return nullptr;
 }
 
-set<FunctionCall const*> SMTEncoder::collectABICalls(ASTNode const* _node)
+set<FunctionCall const*, ASTCompareByID<FunctionCall>> SMTEncoder::collectABICalls(ASTNode const* _node)
 {
 	struct ABIFunctions: public ASTConstVisitor
 	{
@@ -2951,7 +2961,7 @@ set<FunctionCall const*> SMTEncoder::collectABICalls(ASTNode const* _node)
 				}
 		}
 
-		set<FunctionCall const*> abiCalls;
+		set<FunctionCall const*, ASTCompareByID<FunctionCall>> abiCalls;
 	};
 
 	return ABIFunctions(_node).abiCalls;

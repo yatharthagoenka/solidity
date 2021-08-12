@@ -106,6 +106,7 @@ void FuzzerUtil::testCompiler(
 			frontend::ModelCheckerContracts::Default(),
 			/*divModWithSlacks*/true,
 			frontend::ModelCheckerEngine::All(),
+			frontend::ModelCheckerExtCalls{},
 			/*showUnproved=*/false,
 			smtutil::SMTSolverChoice::All(),
 			frontend::ModelCheckerTargets::Default(),

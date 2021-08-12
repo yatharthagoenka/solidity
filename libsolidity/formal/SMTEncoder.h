@@ -115,7 +115,7 @@ public:
 	/// RationalNumberType or can be const evaluated, and nullptr otherwise.
 	static RationalNumberType const* isConstant(Expression const& _expr);
 
-	static std::set<FunctionCall const*> collectABICalls(ASTNode const* _node);
+	static std::set<FunctionCall const*, ASTCompareByID<FunctionCall>> collectABICalls(ASTNode const* _node);
 
 	/// @returns all the sources that @param _source depends on,
 	/// including itself.
@@ -213,6 +213,8 @@ protected:
 	bool shouldAnalyze(ContractDefinition const& _contract) const;
 
 	bool isPublicGetter(Expression const& _expr);
+
+	smtutil::Expression contractAddressValue(FunctionCall const& _f);
 
 	/// Encodes a modifier or function body according to the modifier
 	/// visit depth.
