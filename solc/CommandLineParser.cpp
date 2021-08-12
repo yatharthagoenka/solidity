@@ -88,6 +88,7 @@ static string const g_strMetadataLiteral = "metadata-literal";
 static string const g_strModelCheckerContracts = "model-checker-contracts";
 static string const g_strModelCheckerDivModNoSlacks = "model-checker-div-mod-no-slacks";
 static string const g_strModelCheckerEngine = "model-checker-engine";
+static string const g_strModelCheckerExtCalls = "model-checker-ext-calls";
 static string const g_strModelCheckerShowUnproved = "model-checker-show-unproved";
 static string const g_strModelCheckerSolvers = "model-checker-solvers";
 static string const g_strModelCheckerTargets = "model-checker-targets";
@@ -732,6 +733,12 @@ General Information)").c_str(),
 			"Select model checker engine."
 		)
 		(
+			g_strModelCheckerExtCalls.c_str(),
+			po::value<string>()->value_name("untrusted,trusted")->default_value("untrusted"),
+			"Select whether external calls should be considered untrusted or trusted"
+			" if the called function's code is available."
+		)
+		(
 			g_strModelCheckerShowUnproved.c_str(),
 			"Show all unproved targets separately."
 		)
@@ -1112,6 +1119,18 @@ General Information)").c_str(),
 		m_options.modelChecker.settings.engine = *engine;
 	}
 
+	if (m_args.count(g_strModelCheckerExtCalls))
+	{
+		string mode = m_args[g_strModelCheckerExtCalls].as<string>();
+		optional<ModelCheckerExtCalls> extCallsMode = ModelCheckerExtCalls::fromString(mode);
+		if (!extCallsMode)
+		{
+			serr() << "Invalid option for --" << g_strModelCheckerExtCalls << ": " << mode << endl;
+			return false;
+		}
+		m_options.modelChecker.settings.externalCalls = *extCallsMode;
+	}
+
 	if (m_args.count(g_strModelCheckerShowUnproved))
 		m_options.modelChecker.settings.showUnproved = true;
 
@@ -1147,6 +1166,7 @@ General Information)").c_str(),
 		m_args.count(g_strModelCheckerContracts) ||
 		m_args.count(g_strModelCheckerDivModNoSlacks) ||
 		m_args.count(g_strModelCheckerEngine) ||
+		m_args.count(g_strModelCheckerExtCalls) ||
 		m_args.count(g_strModelCheckerShowUnproved) ||
 		m_args.count(g_strModelCheckerSolvers) ||
 		m_args.count(g_strModelCheckerTargets) ||
