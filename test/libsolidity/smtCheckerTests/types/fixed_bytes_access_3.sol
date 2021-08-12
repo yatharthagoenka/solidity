@@ -30,5 +30,6 @@ contract C {
 }
 // ====
 // SMTEngine: all
+// SMTIgnoreCex: yes
 // ----
 // Warning 6368: (456-462): CHC: Out of bounds access happens here.
