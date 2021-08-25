@@ -1613,6 +1613,13 @@ bool TypeChecker::visit(UnaryOperation const& _operation)
 	_operation.annotation().isPure = !modifying && *_operation.subExpression().annotation().isPure;
 	_operation.annotation().isLValue = false;
 
+	if (op == Token::Delete && subExprType->containsNestedMapping())
+		m_errorReporter.fatalTypeError(
+			2811_error,
+			_operation.location(),
+			"Type containing a (nested) mapping cannot be deleted."
+		);
+
 	return false;
 }
 
@@ -2839,6 +2846,15 @@ bool TypeChecker::visit(MemberAccess const& _memberAccess)
 			);
 
 		if (
+			funType->kind() == FunctionType::Kind::ArrayPop &&
+			exprType->containsNestedMapping()
+		)
+			m_errorReporter.typeError(
+				6298_error,
+				_memberAccess.location(),
+				"Storage arrays with nested mappings do not support .pop()."
+			);
+		else if (
 			funType->kind() == FunctionType::Kind::ArrayPush &&
 			arguments.value().numArguments() != 0 &&
 			exprType->containsNestedMapping()
