@@ -1129,11 +1129,11 @@ BOOST_AUTO_TEST_CASE(cli_include_paths_should_detect_source_unit_name_collisions
 		"The specified values of base path and/or include paths would result in multiple "
 		"input files being assigned the same source unit name:\n"
 		"contract1.sol matches: "
-		"\"" + (expectedWorkDir / "dir1/contract1.sol").string() + "\", "
-		"\"" + (expectedWorkDir / "dir2/contract1.sol").string() + "\"\n"
+		"\"" + (expectedWorkDir / "dir1/contract1.sol").generic_string() + "\", "
+		"\"" + (expectedWorkDir / "dir2/contract1.sol").generic_string() + "\"\n"
 		"contract2.sol matches: "
-		"\"" + (expectedWorkDir / "dir1/contract2.sol").string() + "\", "
-		"\"" + (expectedWorkDir / "dir2/contract2.sol").string() + "\"\n";
+		"\"" + (expectedWorkDir / "dir1/contract2.sol").generic_string() + "\", "
+		"\"" + (expectedWorkDir / "dir2/contract2.sol").generic_string() + "\"\n";
 
 	{
 		// import "contract1.sol" and import "contract2.sol" would be ambiguous:
