@@ -1245,6 +1245,8 @@ BOOST_AUTO_TEST_CASE(cli_include_paths_should_allow_duplicate_paths)
 	createFilesWithParentDirs({"dir1/contract.sol"});
 
 	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::canonical(tempDir).relative_path();
+	boost::filesystem::path expectedTempDir = "/" / tempDir.path().relative_path();
+
 	vector<string> commandLine = {
 		"solc",
 		"--base-path=dir1/",
@@ -1268,7 +1270,9 @@ BOOST_AUTO_TEST_CASE(cli_include_paths_should_allow_duplicate_paths)
 		expectedWorkDir / "dir1/",
 		expectedWorkDir / "dir1/",
 		expectedWorkDir / "dir1/",
-		expectedWorkDir / "dir1/",
+		// NOTE: On macOS expectedTempDir usually contains a symlink and therefore for us it's
+		// different from expectedWorkDir.
+		expectedTempDir / "dir1/",
 		expectedWorkDir / "dir1/",
 		expectedWorkDir / "dir1/",
 	};
