@@ -967,6 +967,25 @@ BOOST_AUTO_TEST_CASE(cli_include_paths)
 		true /* _processInput */
 	);
 
+	// TMP:
+	cout << "TEST: cli_include_paths" << endl;
+	cout << "ACTUAL SOURCES" << endl;
+	for (auto const& [name, source]: result.reader.sourceCodes())
+	{
+		cout << "Source: " << name << "[" << source << "]" << endl;
+
+		for (char c: source)
+		cout << c << "[" << int(c) << "]" << endl;
+	}
+	cout << "EXPECTED SOURCES" << endl;
+	for (auto const& [name, source]: expectedSources)
+	{
+		cout << "Source: " << name << "[" << source << "]" << endl;
+
+		for (char c: source)
+		cout << c << "[" << int(c) << "]" << endl;
+	}
+
 	BOOST_TEST(result.stderrContent == "");
 	BOOST_TEST(result.stdoutContent == "");
 	BOOST_REQUIRE(result.success);
@@ -1068,6 +1087,25 @@ BOOST_AUTO_TEST_CASE(standard_json_include_paths)
 		(parsedStdout["sources"].getMemberNames() | ranges::to<set>) ==
 		(expectedSources | ranges::views::keys | ranges::to<set>) + set<string>{"main.sol"}
 	);
+
+	// TMP:
+	cout << "TEST: standard_json_include_paths" << endl;
+	cout << "ACTUAL SOURCES" << endl;
+	for (auto const& [name, source]: result.reader.sourceCodes())
+	{
+		cout << "Source: " << name << "[" << source << "]" << endl;
+
+		for (char c: source)
+		cout << c << "[" << int(c) << "]" << endl;
+	}
+	cout << "EXPECTED SOURCES" << endl;
+	for (auto const& [name, source]: expectedSources)
+	{
+		cout << "Source: " << name << "[" << source << "]" << endl;
+
+		for (char c: source)
+		cout << c << "[" << int(c) << "]" << endl;
+	}
 
 	BOOST_REQUIRE(result.success);
 	BOOST_TEST(result.options == expectedOptions);
@@ -1240,6 +1278,15 @@ BOOST_AUTO_TEST_CASE(cli_include_paths_should_allow_duplicate_paths)
 	BOOST_REQUIRE(result.success);
 	BOOST_TEST(result.reader.includePaths() == expectedIncludePaths);
 	BOOST_TEST(result.reader.basePath() == expectedWorkDir / "dir1/");
+
+	// TMP:
+	cout << "TEST: cli_include_paths_should_allow_duplicate_paths" << endl;
+	cout << "ACTUAL INCLUDE PATHS" << endl;
+	for (auto const& path: result.reader.includePaths())
+		cout << "Path: " << path << endl;
+	cout << "EXPECTED INCLUDE PATHS" << endl;
+	for (auto const& path: expectedIncludePaths)
+		cout << "Path: " << path << endl;
 }
 
 BOOST_AUTO_TEST_CASE(cli_include_paths_ambiguous_import)
