@@ -2087,7 +2087,7 @@ optional<string> Parser::findLicenseString(std::vector<ASTPointer<ASTNode>> cons
 	if (matches.size() == 1)
 		return matches.front();
 	else if (matches.empty())
-		parserWarning(
+		parserInfo(
 			1878_error,
 			{-1, -1, m_scanner->currentLocation().sourceName},
 			"SPDX license identifier not provided in source file. "
