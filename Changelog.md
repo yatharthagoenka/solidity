@@ -5,10 +5,11 @@ Language Features:
 
 Compiler Features:
  * Commandline Interface: Normalize paths specified on the command line and make them relative for files located inside base path.
+ * Commandline Interface: Disallowed the ``--experimental-via-ir`` option to be used with Standard Json, Assembler and Linker modes.
  * Immutable variables can be read at construction time once they are initialized.
  * SMTChecker: Support low level ``call`` as external calls to unknown code.
  * SMTChecker: Add constraints to better correlate ``address(this).balance`` and ``msg.value``.
- * Commandline Interface: Disallowed the ``--experimental-via-ir`` option to be used with Standard Json, Assembler and Linker modes.
+ * SMTChecker: Support the ``value`` option for external function calls.
 
 
 Bugfixes:

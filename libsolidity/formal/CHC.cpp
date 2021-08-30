@@ -34,6 +34,7 @@
 
 #include <range/v3/algorithm/for_each.hpp>
 
+#include <range/v3/view/enumerate.hpp>
 #include <range/v3/view/reverse.hpp>
 
 #ifdef HAVE_Z3_DLOPEN
@@ -749,7 +750,12 @@ void CHC::externalFunctionCall(FunctionCall const& _funCall)
 		return;
 	}
 
-	FunctionType const& funType = dynamic_cast<FunctionType const&>(*_funCall.expression().annotation().type);
+	FunctionCallOptions const* callOptions = nullptr;
+	Expression const* callExpr = &_funCall.expression();
+	if ((callOptions = dynamic_cast<FunctionCallOptions const*>(callExpr)))
+		callExpr = &callOptions->expression();
+
+	FunctionType const& funType = dynamic_cast<FunctionType const&>(*callExpr->annotation().type);
 	auto kind = funType.kind();
 	solAssert(
 		kind == FunctionType::Kind::External ||
@@ -772,6 +778,19 @@ void CHC::externalFunctionCall(FunctionCall const& _funCall)
 
 	if (!m_currentFunction || m_currentFunction->isConstructor())
 		return;
+
+	if (callOptions)
+	{
+		optional<unsigned> valueIndex;
+		for (auto&& [i, name]: callOptions->names() | ranges::views::enumerate)
+			if (name && *name == "value")
+			{
+				valueIndex = i;
+				break;
+			}
+		solAssert(valueIndex, "");
+		state().addBalance(state().thisAddress(), 0 - expr(*callOptions->options().at(*valueIndex)));
+	}
 
 	auto preCallState = vector<smtutil::Expression>{state().state()} + currentStateVariables();
 

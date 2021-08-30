@@ -2711,7 +2711,11 @@ FunctionDefinition const* SMTEncoder::functionCallToDefinition(
 	if (*_funCall.annotation().kind != FunctionCallKind::FunctionCall)
 		return {};
 
+	FunctionCallOptions const* callOptions = nullptr;
 	Expression const* calledExpr = &_funCall.expression();
+	if ((callOptions = dynamic_cast<FunctionCallOptions const*>(calledExpr)))
+		calledExpr = &callOptions->expression();
+
 	if (TupleExpression const* fun = dynamic_cast<TupleExpression const*>(calledExpr))
 	{
 		solAssert(fun->components().size() == 1, "");
