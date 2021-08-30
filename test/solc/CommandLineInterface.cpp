@@ -1269,8 +1269,8 @@ BOOST_AUTO_TEST_CASE(cli_include_paths_ambiguous_import)
 	string expectedMessage =
 		"Error: Source \"contract.sol\" not found: Ambiguous import. "
 		"Multiple matching files found inside base path and/or include paths: \"" +
-		(expectedWorkDir / "base/contract.sol").string() + "\", \"" +
-		(expectedWorkDir / "include/contract.sol").string() + "\".\n"
+		(expectedWorkDir / "base/contract.sol").generic_string() + "\", \"" +
+		(expectedWorkDir / "include/contract.sol").generic_string() + "\".\n"
 		" --> <stdin>:3:1:\n"
 		"  |\n"
 		"3 | import \"contract.sol\";\n"
