@@ -147,6 +147,7 @@ protected:
 				m_codeDir / "X/bc/d.sol",
 
 				m_codeDir / "x/y/z.sol",
+				m_codeDir / "1/2/3.sol",
 				m_codeDir / "contract.sol",
 
 				m_workDir / "a/b/c/d.sol",
@@ -534,10 +535,10 @@ BOOST_FIXTURE_TEST_CASE(allow_path_automatic_whitelisting_include_paths, AllowPa
 	BOOST_TEST(checkImport("import 'X/c.sol'", {"--base-path=a/b/c", "--include-path", m_codeDir.string() + "/a"}));
 
 	// If there are multiple include paths, all of them get whitelisted
-	BOOST_TEST(checkImport("import 'b/c.sol'", {"--base-path=a/b/c", "--include-path=../code/a", "--include-path=../code/x"}));
-	BOOST_TEST(checkImport("import 'y/z.sol'", {"--base-path=a/b/c", "--include-path=../code/a", "--include-path=../code/x"}));
-	BOOST_TEST(checkImport("import 'b/c.sol'", {"--base-path=a/b/c", "--include-path=../code/x", "--include-path=../code/a"}));
-	BOOST_TEST(checkImport("import 'y/z.sol'", {"--base-path=a/b/c", "--include-path=../code/x", "--include-path=../code/a"}));
+	BOOST_TEST(checkImport("import 'b/c.sol'", {"--base-path=a/b/c", "--include-path=../code/a", "--include-path=../code/1"}));
+	BOOST_TEST(checkImport("import '2/3.sol'", {"--base-path=a/b/c", "--include-path=../code/a", "--include-path=../code/1"}));
+	BOOST_TEST(checkImport("import 'b/c.sol'", {"--base-path=a/b/c", "--include-path=../code/1", "--include-path=../code/a"}));
+	BOOST_TEST(checkImport("import '2/3.sol'", {"--base-path=a/b/c", "--include-path=../code/1", "--include-path=../code/a"}));
 }
 
 BOOST_FIXTURE_TEST_CASE(allow_path_symlinks_within_whitelisted_dir, AllowPathsFixture)
